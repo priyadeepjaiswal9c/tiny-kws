@@ -28,20 +28,22 @@ audio → 64×101 log-mel spectrogram. Output: one of 12 classes — the keyword
   CC-BY-4.0): 105,829 one-second utterances, 35 words. Official
   validation/testing lists (speaker-disjoint); "unknown" = seeded 10% sample
   of the 25 non-keyword words; "silence" = background-noise crops.
-- **Training**: 30 epochs, AdamW lr 3e-3 (cosine), batch 128, label
-  smoothing 0.1, fp32, Colab T4. Augmentation: ±100 ms time-shift +
-  background-noise mixing (p=0.8, vol U(0,0.1)).
+- **Training recipe**: AdamW lr 3e-3 (cosine-annealed), batch 128, label
+  smoothing 0.1, fp32. Augmentation: ±100 ms time-shift + background-noise
+  mixing (p=0.8, vol U(0,0.1)).
+- **This checkpoint**: 3 epochs on Apple M2 (MPS) — an interim model; a
+  30-epoch Colab T4 run will replace it (this card will be updated).
 - **Features**: log-mel, 64 mels, 25 ms window / 10 ms hop, normalized by
   train-set global mean/std (stored inside the checkpoint).
 
 ## Evaluation — official Speech Commands v2 test set (4,890 clips)
 
-<!-- METRICS_TABLE: filled by evaluate.py results, never hand-written -->
+<!-- METRICS_TABLE: produced by evaluate.py, never hand-written -->
 | metric | value |
 |---|---|
-| accuracy | PENDING |
-| macro-F1 | PENDING |
-| CPU latency (batch=1, 1 thread) | PENDING |
+| accuracy | 95.38% |
+| macro-F1 | 95.35% |
+| CPU latency (batch=1, 1 thread, Apple M2) | 1.86 ms mean / 1.96 ms p95 |
 
 Per-class F1 and the confusion matrix: see `metrics.json` and
 `confusion_matrix.png` in this repo.
@@ -56,7 +58,7 @@ from huggingface_hub import hf_hub_download
 from model import DSCNN
 from common import LogMel, normalize
 
-ckpt = torch.load(hf_hub_download("REPO_ID", "best.pt"),
+ckpt = torch.load(hf_hub_download("priyadeepjaiswal9c/tiny-kws", "best.pt"),
                   map_location="cpu", weights_only=True)
 model = DSCNN(**ckpt["model_config"]); model.load_state_dict(ckpt["model_state"]); model.eval()
 
@@ -74,4 +76,4 @@ robust to far-field audio or heavy noise, English only, and trained on
 crowdsourced speech that skews toward certain accents — expect degraded
 accuracy outside that distribution.
 
-Live demo: SPACE_LINK_PENDING · Code: https://github.com/priyadeepjaiswal9c/tiny-kws
+Live demo: https://huggingface.co/spaces/priyadeepjaiswal9c/tiny-kws · Code: https://github.com/priyadeepjaiswal9c/tiny-kws
