@@ -110,9 +110,11 @@ def main():
     preds, targets = predict_all(model, loader, device)
     acc = accuracy_score(targets, preds)
     macro_f1 = f1_score(targets, preds, average="macro")
-    report = classification_report(targets, preds, target_names=LABELS,
-                                   digits=4, output_dict=True)
-    cm = confusion_matrix(targets, preds)
+    class_ids = list(range(len(LABELS)))  # force 12x12 even if a class is absent
+    report = classification_report(targets, preds, labels=class_ids,
+                                   target_names=LABELS, digits=4,
+                                   output_dict=True, zero_division=0)
+    cm = confusion_matrix(targets, preds, labels=class_ids)
 
     args.assets_dir.mkdir(parents=True, exist_ok=True)
     plot_confusion(cm, args.assets_dir / "confusion_matrix.png")
