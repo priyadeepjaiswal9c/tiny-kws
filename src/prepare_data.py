@@ -172,11 +172,14 @@ def main():
 
     # ---- normalization stats from a seeded sample of train ---------------
     srng = np.random.default_rng(SEED)
-    idx = srng.choice(len(train_ex), size=min(STATS_SAMPLE, len(train_ex)),
-                      replace=False)
-    sample = torch.from_numpy(
-        np.asarray(bank[np.sort(idx)], dtype=np.float32) / 32768.0)
-    sample_feats = logmel(sample)
+    idx = np.sort(srng.choice(len(train_ex), replace=False,
+                              size=min(STATS_SAMPLE, len(train_ex))))
+    chunks = []
+    for i in range(0, len(idx), 512):  # chunked to keep peak RAM low
+        sample = torch.from_numpy(
+            np.asarray(bank[idx[i:i + 512]], dtype=np.float32) / 32768.0)
+        chunks.append(logmel(sample))
+    sample_feats = torch.cat(chunks)
     stats = {"mean": float(sample_feats.mean()), "std": float(sample_feats.std()),
              "log_eps": LOG_EPS, "stats_sample": int(len(idx))}
     with open(out / "stats.json", "w") as f:
