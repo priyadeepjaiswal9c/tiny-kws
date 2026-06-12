@@ -34,7 +34,11 @@ NOISE_MAX_VOL = 0.1       # noise amplitude scale, as in Warden's TF reference
 class TrainWaveformDataset(Dataset):
     def __init__(self, processed_dir: Path, augment: bool = True):
         processed_dir = Path(processed_dir)
-        self.bank = np.load(processed_dir / "train_bank.npy", mmap_mode="r")
+        # Keep only the PATH here and open the memmap lazily per process:
+        # macOS DataLoader workers are spawned and pickle the dataset, and
+        # pickling an np.memmap would materialize the whole bank in RAM.
+        self.bank_path = processed_dir / "train_bank.npy"
+        self._bank = None
         self.labels = torch.from_numpy(
             np.load(processed_dir / "train_labels.npy")
         ).long()
@@ -42,6 +46,15 @@ class TrainWaveformDataset(Dataset):
         self.noise = [t.float() for t in torch.load(
             processed_dir / "noise.pt", weights_only=True)]
         self.augment = augment
+
+    @property
+    def bank(self):
+        if self._bank is None:
+            self._bank = np.load(self.bank_path, mmap_mode="r")
+        return self._bank
+
+    def __getstate__(self):
+        return {**self.__dict__, "_bank": None}
 
     def __len__(self):
         return len(self.labels)
