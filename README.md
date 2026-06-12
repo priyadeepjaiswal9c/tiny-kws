@@ -6,7 +6,7 @@ plus *unknown* and *silence*, from 1-second audio clips. Trained in PyTorch
 on Google Speech Commands v2 and deployed as a live browser-microphone demo
 on Hugging Face Spaces (free CPU).
 
-**Live demo:** _link pending deploy_ · **Model:** _link pending upload_
+**Live demo:** https://huggingface.co/spaces/priyadeepjaiswal9c/tiny-kws · **Model:** https://huggingface.co/priyadeepjaiswal9c/tiny-kws
 
 ![confusion matrix](assets/confusion_matrix.png)
 
