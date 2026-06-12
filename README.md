@@ -18,11 +18,15 @@ from training) and stored in [`assets/metrics.json`](assets/metrics.json).
 
 | metric | value |
 |---|---|
-| test accuracy | _pending final training run_ |
-| macro-F1 | _pending_ |
+| test accuracy | **95.38%** |
+| macro-F1 | **95.35%** |
 | parameters | 119,372 |
-| weights (fp32) | ~0.48 MB |
-| CPU latency (batch=1, 1 thread) | _pending_ |
+| weights (fp32) | 0.51 MB |
+| CPU latency (batch=1, 1 thread, Apple M2) | 1.86 ms mean / 1.96 ms p95 |
+
+*Current numbers are from a 3-epoch smoke-test checkpoint trained on Apple
+M2 (MPS); the full 30-epoch Colab T4 run will replace them. Weakest class:
+"unknown" (F1 0.874); most confused pairs: go→no (12), off→up (11).*
 
 Published reference points on this benchmark (not our numbers): the original
 CNN baseline reaches 88.2% (Warden 2018); Keyword Transformer reports 98.6%
