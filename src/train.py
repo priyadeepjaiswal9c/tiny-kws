@@ -137,7 +137,8 @@ def main():
             "val_acc": val_acc,
             "epoch": epoch,
             "history": history,
-            "torch_version": torch.__version__,
+            # str(): the TorchVersion object isn't loadable under weights_only=True
+            "torch_version": str(torch.__version__),
         }
         torch.save(ckpt, args.out_dir / "last.pt")
         if val_acc > best_val:

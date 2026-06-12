@@ -59,12 +59,14 @@ torch.set_num_threads(2)  # Spaces free tier has 2 vCPUs
 def to_mono_16k(sr: int, wav: np.ndarray) -> torch.Tensor:
     """Browser audio -> float32 mono 16 kHz tensor."""
     wav = np.asarray(wav)
-    if wav.ndim == 2:                       # (n, channels) -> mono
-        wav = wav.mean(axis=1)
+    # scale BEFORE channel-averaging: mean() promotes int16 to float64 and
+    # would silently skip the integer scaling for stereo input
     if np.issubdtype(wav.dtype, np.integer):
         wav = wav.astype(np.float32) / np.iinfo(wav.dtype).max
     else:
         wav = wav.astype(np.float32)
+    if wav.ndim == 2:                       # (n, channels) -> mono
+        wav = wav.mean(axis=1)
     t = torch.from_numpy(wav)
     if sr != SAMPLE_RATE:                   # polyphase resample (anti-aliased)
         t = AF.resample(t, orig_freq=sr, new_freq=SAMPLE_RATE)
