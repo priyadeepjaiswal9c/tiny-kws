@@ -196,19 +196,25 @@ to explore, tiny steps late to settle. Batch size 128.
   equally regardless of size, so a model that quietly fails on "silence"
   can't hide behind the keyword classes. Reporting both is the honest move.
 - The **confusion matrix** (true class × predicted class) shows *which*
-  mistakes happen. Expected patterns: "no"↔"go" and "no"↔"down" (similar
-  vowels), "off"↔"up", and keywords ↔ "unknown" — by construction "unknown"
-  overlaps acoustically with the keywords (it contains "forward", which
-  begins like "four"/"for"; "tree", which sounds like "three"; etc.).
+  mistakes happen. **What our final model actually does** (official test
+  set, 164 total errors out of 4,890): the single biggest confusion is
+  off→up (15), then on→off (8), go→no (7), up→on (6), down→no (6) — all
+  acoustically sensible (shared vowels/short plosive onsets). The hardest
+  class is "unknown" (F1 0.921): 39% of all errors involve it, because by
+  construction it overlaps every keyword (it's sampled from 25 other words,
+  some near-homophones — "tree"/"three", "forward"/"four"). "silence" is
+  near-perfect (F1 0.998). This is the honest story to tell in an interview:
+  the errors are where phonetics predicts they'd be, not random.
 
 ## 11. The edge/TinyML framing
 
 "Small" is a feature, not a limitation, and it's measured:
 - **119,372 parameters / 0.48 MB fp32** — fits in the SRAM of a Cortex-M7
   class microcontroller; quantized to int8 it would be ~0.12 MB.
-- **CPU latency, batch=1, single thread** (see assets/metrics.json for the
-  measured number) — the realistic deployment setting: a stream of single
-  clips on a small CPU, no batching, no GPU.
+- **CPU latency, batch=1, single thread: ~1.9 ms** (measured on Apple M2;
+  see assets/metrics.json) — the realistic deployment setting: a stream of
+  single clips on a small CPU, no batching, no GPU. That's ~500 inferences
+  per second on one core; a wake-word model only needs ~10/s.
 - For context, MobileNet-style factorization is exactly how production
   wake-word models are built; our DS-CNN is the canonical small-footprint
   KWS architecture (arXiv:1711.07128).
