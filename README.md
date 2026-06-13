@@ -56,7 +56,7 @@ related 35-class task (de Andrade et al. 2018).
 
 See [LEARNING.md](LEARNING.md) for plain-English explanations of every
 concept (sampling/Nyquist → mel filterbanks → depthwise-separable convs →
-metrics), written to be readable by a 2nd-year engineering student.
+metrics).
 
 ## Reproduce
 
